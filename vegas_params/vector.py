@@ -9,8 +9,16 @@ class vector(np.ndarray):
         return self.mag()**2
     def dot(self, other)->np.ndarray:
         return np.sum(self*other, axis=self._vector_axis, keepdims=True)
-    
-   
+    @property
+    def x(self):
+        return self.take(0, axis=self._vector_axis)
+    @property
+    def y(self):
+        return self.take(1, axis=self._vector_axis)
+    @property
+    def z(self):
+        return self.take(2, axis=self._vector_axis)
+        
 @expression 
 class Vector:
     """Construct vector from given coordinates"""
