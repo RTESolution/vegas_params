@@ -2,7 +2,6 @@ import vegas
 from .base import Expression
 from warnings import warn
 import numpy as np
-from loguru import logger
 
 def integral(e: Expression):
     """decorator for turning expression into integral"""
@@ -10,13 +9,10 @@ def integral(e: Expression):
     @vegas.lbatchintegrand
     def _integrand(x):
         result = e(x)
-        if isinstance(result, np.ndarray):
-            return np.squeeze(result) * np.squeeze(e.factor)
-        elif isinstance(result, dict):
+        if isinstance(result, dict):
             return {key:np.squeeze(value)*np.squeeze(e.factor) for key,value in result.items()}
         else:
-            logger.warn('Failed to apply the factor to result of type {}',type(result))
-            return result
+            return np.squeeze(result) * np.squeeze(e.factor)
         
     def _run(**vegas_parameters):
         return integrator(_integrand, **vegas_parameters)
