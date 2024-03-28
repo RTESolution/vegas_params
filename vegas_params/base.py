@@ -8,6 +8,7 @@ from functools import wraps
 
 class Parameter(abc.ABC):
     """Base class for the parameter in the expression"""
+    factor = 1
     def __init__(self):
         self.input_limits = None
     def __len__(self):
@@ -71,11 +72,17 @@ class Expression(Uniform):
         #evaluate all the parameters 
         n=0
         par_values = {}
+        factor_from_parameters = 1
         for name,par in self.parameters.items():
             par_values[name] = par(x[:,n:n+len(par)])
+            factor_from_parameters *= par.factor
             n+=len(par)
         #run the final evaluation function
-        return self.make(*par_values.values())
+        self.factor = 1
+        result = self.make(*par_values.values())
+        #calculate the resulting factor
+        self.factor = self.factor*factor_from_parameters
+        return result
         
     def make(self, *args):
         "this is a default method, returning a dictionary of input parameters"
