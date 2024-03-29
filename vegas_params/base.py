@@ -155,11 +155,19 @@ def expression(obj=None, **parameters):
         return expression_from_class(obj)
     elif isinstance(obj, Callable):
         #make a class and wrap it
-        class c:
-            make=staticmethod(obj)
-        #set parameters
         S = inspect.signature(obj)
-        c.__annotations__ = {name:Parameter for name in list(S.parameters)}
+        parameters = list(S.parameters)
+        if parameters[0]=='self':
+            del parameters[0]
+            make_function = obj
+        else:
+            make_function = staticmethod(obj)
+        class c:
+            #check if a first argument is "self"
+            make=make_function
+        #set parameters
+            
+        c.__annotations__ = {name:Parameter for name in parameters}
         c.__qualname__ = obj.__qualname__
         c.__doc__ = obj.__doc__
         c.__name__ = obj.__name__
