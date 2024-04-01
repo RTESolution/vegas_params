@@ -3,7 +3,7 @@ from vegas_params import expression, Uniform, Vector, Direction, Scalar, vector
 from vegas_params import integral
 
 def assert_integral_is_close(e, value, nsigmas=1):
-    x = integral(e)(nitn=10, neval=10000)
+    x = integral(e)(nitn=10, neval=20000)
     assert (x.mean - value) < nsigmas*x.sdev
     
 def test_1d_constant_integral():
