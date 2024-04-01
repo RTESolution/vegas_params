@@ -3,7 +3,7 @@ from vegas_params import expression, Uniform, Vector, Direction, Scalar, vector
 from vegas_params import integral
 
 def assert_integral_is_close(e, value, nsigmas=1):
-    x = integral(e)(nitn=10, neval=20000)
+    x = integral(e)(nitn=10, neval=10000)
     assert (x.mean - value) < nsigmas*x.sdev
     
 def test_1d_constant_integral():
@@ -37,6 +37,18 @@ def test_Gaussian_integral():
 
     assert_integral_is_close(gaussian, np.sqrt(np.pi))
 
+def test_Spherical_integral_simple():
+    def density(r):
+        return np.ones(r.shape[0])
+    #test spherical integral with factor
+    Rsphere=10
+    @expression(R=Scalar(Uniform([0,Rsphere])), direction=Direction())
+    def density(R, direction):
+        r = R*direction
+        return R**2
+
+    assert_integral_is_close(density, 4/3*np.pi*Rsphere**3)
+
 def test_Spherical_integral():
     #test spherical integral with factor
     @expression
@@ -47,10 +59,10 @@ def test_Spherical_integral():
             self.factor = R**2
             return R*s
 
-    R=10
+    Rsphere=10
     
-    @expression(r=Spherical(R=Uniform([0,R])))
+    @expression(r=Spherical(R=Scalar(Uniform([0,Rsphere]))))
     def density(r:vector):
         return np.ones(r.shape[0])
         
-    assert_integral_is_close(density, 4/3*np.pi*R**3)
+    assert_integral_is_close(density, 4/3*np.pi*Rsphere**3)
