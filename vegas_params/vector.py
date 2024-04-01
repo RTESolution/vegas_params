@@ -9,6 +9,16 @@ class vector(np.ndarray):
         return self.mag()**2
     def dot(self, other)->np.ndarray:
         return np.sum(self*other, axis=self._vector_axis, keepdims=True)
+    def __mul__(self, other:np.ndarray):
+        #check the dimension
+        a = np.asarray(other)
+        if(a.ndim==2):
+            #expand the dimensions
+            a = np.expand_dims(a, self._vector_axis)
+        return super().__mul__(a)
+    def __rmul__(self, other:np.ndarray):
+        return self.__mul__(other)
+
     @property
     def x(self):
         return self.take(0, axis=self._vector_axis)
@@ -18,7 +28,7 @@ class vector(np.ndarray):
     @property
     def z(self):
         return self.take(2, axis=self._vector_axis)
-        
+
 @expression 
 class Vector:
     """Construct vector from given coordinates"""
