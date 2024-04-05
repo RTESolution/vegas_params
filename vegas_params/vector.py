@@ -34,7 +34,7 @@ class Vector:
     """Construct vector from given coordinates"""
     xyz:Uniform = Fixed([0,0,0])
     @staticmethod
-    def make(xyz):
+    def __call__(xyz):
         return xyz.reshape(xyz.shape[0],-1,3).view(vector)
 
 @expression
@@ -42,7 +42,7 @@ class Scalar:
     """Construct vector from given coordinates"""
     x:Uniform = Fixed(0)
     @staticmethod
-    def make(x):
+    def __call__(x):
         return x.reshape(x.shape[0],-1,1).view(vector)
 
 @expression
@@ -51,7 +51,7 @@ class Direction(Vector):
     cos_theta:Uniform = Uniform([-1,1]) 
     phi:Uniform = Uniform([0,2*np.pi])
     @staticmethod
-    def make(cos_theta:np.ndarray, phi:np.ndarray)->np.ndarray:
+    def __call__(cos_theta:np.ndarray, phi:np.ndarray)->np.ndarray:
         sin_theta = np.sqrt(1-cos_theta**2)
         return np.stack([sin_theta*np.cos(phi),sin_theta*np.sin(phi), cos_theta], axis=-1).view(vector)
 
@@ -61,5 +61,5 @@ class PolarVector(Vector):
     R:Uniform = 1
     s:Direction = Direction()
     @staticmethod
-    def make(R,s):
+    def __call__(R,s):
         return R*s

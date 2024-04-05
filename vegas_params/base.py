@@ -13,7 +13,9 @@ class Parameter(abc.ABC):
         self.input_limits = None
     def __len__(self):
         return self.input_limits.shape[0]
-    def __call__(self, x:np.ndarray)->np.ndarray:
+    
+    @abc.abstractmethod
+    def __construct__(self, x:np.ndarray)->np.ndarray:
         """Calculate this parameter value from the input array"""
         pass
     def sample(self, size=1):
@@ -21,14 +23,14 @@ class Parameter(abc.ABC):
         x = np.random.uniform(self.input_limits[:,0],
                               self.input_limits[:,1], 
                               size=[size,len(self)])
-        return self(x)
+        return self.__construct__(x)
 
 class Fixed(Parameter):
     """Fixed value, not a part of integration"""
     def __init__(self, value=0):
         self.input_limits = np.empty(shape=(0,2))
         self.value = np.atleast_1d(value)[np.newaxis,:]
-    def __call__(self, x):
+    def __construct__(self, x):
         shape = (x.shape[0],*self.value.shape[1:])
         result = np.ones(shape)*self.value
         return result
@@ -41,7 +43,7 @@ class Uniform(Parameter):
     """Parameter integrated in the given limits"""
     def __init__(self, limits=[0,1]):
         self.input_limits = np.array(limits, ndmin=2)
-    def __call__(self, x:np.ndarray)->np.ndarray:
+    def __construct__(self, x:np.ndarray)->np.ndarray:
         return x
     def __pow__(self, n:int)->'Uniform':
         return self.__class__(limits=np.repeat(self.input_limits, n, axis=0))
@@ -68,24 +70,24 @@ class Expression(Uniform):
         self._update_limits()
     def _update_limits(self):
         self.input_limits = np.concatenate([par.input_limits for par in self.parameters.values()])
-    def __call__(self, x:np.ndarray)->np.ndarray:
+    def __construct__(self, x:np.ndarray):
         #evaluate all the parameters 
         n=0
         par_values = {}
         factor_from_parameters = 1
         for name,par in self.parameters.items():
-            par_values[name] = par(x[:,n:n+len(par)])
+            par_values[name] = par.__construct__(x[:,n:n+len(par)])
             factor_from_parameters *= par.factor
             n+=len(par)
         #run the final evaluation function
         self.factor = 1
-        result = self.make(*par_values.values())
+        result = self.__call__(*par_values.values())
         #calculate the resulting factor
         self.factor = self.factor*factor_from_parameters
         return result
         
-    def make(self, *args):
-        "this is a default method, returning a dictionary of input parameters"
+    def __call__(self, *args):
+        """Calculate the expression value(s) based on the input values"""
         return dict(zip(self.parameters,args))
     def __pow__(self, n:int)->'Expression':
         return self.__class__(**{name: par**n for name,par in self.parameters.items()})
@@ -100,7 +102,7 @@ class Concat(Expression):
     def __init__(self, *expressions:Sequence[Parameter]):
         super().__init__(**{f"p_{num}":expr for num,expr in enumerate(expressions)})
     @staticmethod
-    def make(*args:Sequence[np.ndarray])->np.ndarray:
+    def __call__(*args:Sequence[np.ndarray])->np.ndarray:
         result = np.concatenate(args,axis=1)
         return result
     def __or__(self, other):
@@ -114,7 +116,7 @@ def expression_from_callable(**parameters):
         c = Expression(**parameters)
         c.__name__ = obj.__name__
         c.__qualname__ = obj.__qualname__
-        c.make = obj
+        c.__call__ = obj
         return c
     return _wrapper
 
@@ -164,7 +166,7 @@ def expression(obj=None, **parameters):
             make_function = staticmethod(obj)
         class c:
             #check if a first argument is "self"
-            make=make_function
+            __call__=make_function
         #set parameters
             
         c.__annotations__ = {name:Parameter for name in parameters}
