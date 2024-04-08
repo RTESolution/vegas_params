@@ -84,6 +84,7 @@ class Expression(Uniform):
         result = self.__call__(*par_values.values())
         #calculate the resulting factor
         self.factor = self.factor*factor_from_parameters
+        self.factor = np.squeeze(self.factor)
         return result
         
     def __call__(self, *args):
@@ -104,7 +105,7 @@ class Concat(Expression):
     @staticmethod
     def __call__(*args:Sequence[np.ndarray])->np.ndarray:
         result = np.concatenate(args,axis=1)
-        return result
+        return result.view(type(args[0]))
     def __or__(self, other):
         #if concatenating with another Concat
         return Concat(*list(self.parameters.values()), other)
