@@ -5,7 +5,7 @@ import inspect
 
 def swap_axes(a):
     if isinstance(a, np.ndarray):
-        return np.swapaxes(a,0,1)
+        return a.swapaxes(0,1)
     elif isinstance(a, Mapping):
         #handle the mapping
         data = {name: swap_axes(value) for name,value in a.items()}
@@ -13,7 +13,7 @@ def swap_axes(a):
     elif isinstance(a, Iterable):
         #handle the iterable
         data = [swap_axes(value) for value in a]
-        return a.__class__(*data)
+        return a.__class__(data)
     elif hasattr(a, "__dataclass_fields__"):
         #handle the dataclass
         data = {name: swap_axes(a.__dict__[name]) for name in a.__dataclass_fields__}
