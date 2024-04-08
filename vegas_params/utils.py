@@ -52,6 +52,32 @@ def swapaxes(func):
         return func(*args_T, **kwargs_T)
     return _f
 
+from typing import Callable
+from functools import wraps
+
+def save_input(name='input'):
+    def decorator(func):
+        S = inspect.signature(func)
+        is_static = list(S.parameters)[0]!='self'
+        if(is_static):
+            raise ValueError("Must provide a class method, not static")
+        
+        @wraps(func)
+        def _f(self, *args,**kwargs):
+            params = S.bind(self, *args, **kwargs)
+            params.apply_defaults()
+            del params.arguments['self']
+            self.__dict__[name] = params.arguments
+            return func(self, *params.args, **params.kwargs)
+        return _f
+        
+    if isinstance(name, Callable):
+        return save_input()(name)
+    else:
+        return decorator
+    
+
 def mask_all(a:Iterable[np.ndarray], mask:np.ndarray, axis=1)->Iterable[np.ndarray]:
     """produce a smaller array (where mask==False) - for all arrays in given iterable (works on NamedTuples too)"""
     return a.__class__(*[mask_array(f, mask, axis) for f in a])
+
