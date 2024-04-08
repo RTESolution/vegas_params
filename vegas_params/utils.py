@@ -17,7 +17,7 @@ def swap_axes(a):
     elif hasattr(a, "__dataclass_fields__"):
         #handle the dataclass
         data = {name: swap_axes(a.__dict__[name]) for name in a.__dataclass_fields__}
-        return p.__class__(**data)
+        return a.__class__(**data)
     else:
         raise TypeError(f"Cannot swap axes for type {type(a)}")
 
