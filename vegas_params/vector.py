@@ -4,11 +4,11 @@ from .base import expression, Uniform, Fixed
 class vector(np.ndarray):
     _vector_axis = -1
     def mag(self)->np.ndarray:
-        return np.linalg.norm(self, axis=self._vector_axis, keepdims=True)
+        return np.linalg.norm(self, axis=self._vector_axis, keepdims=True).view(np.ndarray)
     def mag2(self)->np.ndarray:
         return self.mag()**2
     def dot(self, other)->np.ndarray:
-        return np.sum(self*other, axis=self._vector_axis, keepdims=True)
+        return np.sum(self*other, axis=self._vector_axis, keepdims=True).view(np.ndarray)
     def __mul__(self, other:np.ndarray):
         #check the dimension
         a = np.asarray(other)
@@ -21,13 +21,13 @@ class vector(np.ndarray):
 
     @property
     def x(self):
-        return self.take(0, axis=self._vector_axis)
+        return self.take(0, axis=self._vector_axis).view(np.ndarray)
     @property
     def y(self):
-        return self.take(1, axis=self._vector_axis)
+        return self.take(1, axis=self._vector_axis).view(np.ndarray)
     @property
     def z(self):
-        return self.take(2, axis=self._vector_axis)
+        return self.take(2, axis=self._vector_axis).view(np.ndarray)
 
 @expression 
 class Vector:
@@ -43,7 +43,7 @@ class Scalar:
     x:Uniform = Fixed(0)
     @staticmethod
     def __call__(x):
-        return x.reshape(x.shape[0],-1,1).view(vector)
+        return x.reshape(x.shape[0],-1,1)
 
 @expression
 class Direction(Vector):
