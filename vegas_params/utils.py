@@ -21,18 +21,27 @@ def swap_axes(a):
     else:
         raise TypeError(f"Cannot swap axes for type {type(a)}")
 
-def mask_array(a:np.ndarray, mask:np.ndarray, axis=1)->np.ndarray:
+def mask_array(a:np.ndarray, mask:np.ndarray, axis=0)->np.ndarray:
     """produce a smaller array (where mask==False)"""
     result = a.take(np.flatnonzero(~mask),axis=axis)
     return result
-   
-def unmask_array(a:np.ndarray, mask:np.ndarray, fill_value=0, axis=1)->np.ndarray:
+
+def unmask_array(a:np.ndarray, mask:np.ndarray, fill_value=0, axis=0)->np.ndarray:
     """produce a larger array, filling the values where `mask==True` with the `fill_value`"""
+    a = a.swapaxes(0,axis)
     shape = list(a.shape)
-    shape[axis] = len(mask)
+    shape[0] = len(mask)
     result = np.ones(shape, dtype=a.dtype)*fill_value
-    result[:,~mask] = a
-    return result
+    result[~mask] = a
+    return result.swapaxes(0,axis)
+
+def mask_arrays(arrays:Iterable[np.ndarray], *, mask:np.ndarray, axis=1)->Iterable[np.ndarray]:
+    """produce a smaller array (where mask==False) - for all arrays in given iterable (works on NamedTuples too)"""
+    return [mask_array(a, mask, axis) for a in arrays]
+
+def unmask_arrays(arrays:Iterable[np.ndarray], *, mask:np.ndarray, fill_value=0, axis=1)->Iterable[np.ndarray]:
+    """produce a smaller array (where mask==False) - for all arrays in given iterable (works on NamedTuples too)"""
+    return [unmask_array(a, mask=mask, fill_value=fill_value, axis=axis) for a in arrays]
 
 def swapaxes(func):
     S = inspect.signature(func)
@@ -49,7 +58,12 @@ def swapaxes(func):
             args_T = [params.args[0],*swap_axes(params.args[1:])]
         kwargs_T = swap_axes(params.kwargs)
         #pass as positional arguments 
-        return func(*args_T, **kwargs_T)
+        result = func(*args_T, **kwargs_T)
+        try: 
+            return swap_axes(result)
+        except TypeError:
+            return result
+            
     return _f
 
 from typing import Callable
@@ -76,8 +90,3 @@ def save_input(name='input'):
     else:
         return decorator
     
-
-def mask_all(a:Iterable[np.ndarray], mask:np.ndarray, axis=1)->Iterable[np.ndarray]:
-    """produce a smaller array (where mask==False) - for all arrays in given iterable (works on NamedTuples too)"""
-    return a.__class__(*[mask_array(f, mask, axis) for f in a])
-
