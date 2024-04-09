@@ -37,10 +37,16 @@ def unmask_array(a:np.ndarray, mask:np.ndarray, fill_value=0, axis=0)->np.ndarra
 
 def mask_arrays(arrays:Iterable[np.ndarray], *, mask:np.ndarray, axis=1)->Iterable[np.ndarray]:
     """produce a smaller array (where mask==False) - for all arrays in given iterable (works on NamedTuples too)"""
+    if isinstance(arrays, np.ndarray):
+        a=arrays
+        return mask_array(a, mask=mask, axis=axis)
     return [mask_array(a, mask, axis) for a in arrays]
 
 def unmask_arrays(arrays:Iterable[np.ndarray], *, mask:np.ndarray, fill_value=0, axis=1)->Iterable[np.ndarray]:
     """produce a smaller array (where mask==False) - for all arrays in given iterable (works on NamedTuples too)"""
+    if isinstance(arrays, np.ndarray):
+        a=arrays
+        return unmask_array(a, mask=mask, fill_value=fill_value, axis=axis)
     return [unmask_array(a, mask=mask, fill_value=fill_value, axis=axis) for a in arrays]
 
 def swapaxes(func):
