@@ -8,7 +8,7 @@ def integral(e: Expression):
     integrator = vegas.Integrator(e.input_limits)
     @vegas.lbatchintegrand
     def _integrand(x):
-        result = e(x)
+        result = e.__construct__(x)
         if isinstance(result, dict):
             return {key:np.squeeze(value)*np.squeeze(e.factor) for key,value in result.items()}
         else:
