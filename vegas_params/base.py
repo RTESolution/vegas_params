@@ -110,6 +110,20 @@ class Concat(Expression):
         #if concatenating with another Concat
         return Concat(*list(self.parameters.values()), other)
 
+class FromDistribution(Expression):
+    """Sample the input from the given distribution"""
+    def __init__(self, ppf:callable, size:int=1):
+        """Parameters:
+        ppf: Callable
+            Percent point function (inverse of cumulative density function — percentiles)
+        """
+        self.ppf = ppf
+        super().__init__(y=Uniform([0,1])**size)
+    def __call__(self,y):
+        return self.ppf(y)
+    def __pow__(self, n:int):
+        return self.__class__(self.ppf, len(self)*n)
+
 #define the decorators
 def expression_from_callable(**parameters):
     """decorator for creating the Expression from function"""
