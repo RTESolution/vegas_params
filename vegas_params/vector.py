@@ -12,7 +12,7 @@ class vector(np.ndarray):
     def __mul__(self, other:np.ndarray):
         #check the dimension
         a = np.asarray(other)
-        if(a.ndim==2):
+        if(a.ndim==self.ndim-1):
             #expand the dimensions
             a = np.expand_dims(a, self._vector_axis)
         return super().__mul__(a)
