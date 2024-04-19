@@ -15,7 +15,10 @@ def integral(e: Expression):
         
     if(len(e)>0):
         integrator = vegas.Integrator(e.input_limits)
-        def _run_integral(**vegas_parameters):
+        def _run_integral(adapt=False, **vegas_parameters):
+            if adapt:
+                #run the calculation without storing the result
+                integrator(vegas.lbatchintegrand(_integrand), nitn=10, neval=1000)
             return integrator(vegas.lbatchintegrand(_integrand), **vegas_parameters)
         return _run_integral
     
