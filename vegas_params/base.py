@@ -62,14 +62,15 @@ class Expression(Uniform):
     """Complex expression of the given input parameters"""
     def __init__(self, **parameters):
         self.parameters = {name:_make_parameter(par) for name,par in  parameters.items()} 
-        self._update_limits()
     def __getitem__(self, name:str)->Parameter:
         return self.parameters[name]
     def __setitem__(self, name:str, value):
         self.parameters[name] = _make_parameter(value)
-        self._update_limits()
-    def _update_limits(self):
-        self.input_limits = np.concatenate([par.input_limits for par in self.parameters.values()])
+        
+    @property
+    def input_limits(self):
+        return np.concatenate([par.input_limits for par in self.parameters.values()])
+
     def __construct__(self, x:np.ndarray):
         #evaluate all the parameters 
         n=0
@@ -83,7 +84,7 @@ class Expression(Uniform):
         self.factor = 1
         result = self.__call__(*par_values.values())
         #calculate the resulting factor
-        self.factor = self.factor*factor_from_parameters
+        self.factor = self.factor * factor_from_parameters
         self.factor = np.squeeze(self.factor)
         return result
         
