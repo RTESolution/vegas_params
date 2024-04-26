@@ -5,7 +5,7 @@ Wrapper package for [Vegas](https://vegas.readthedocs.io) integrator.
 
 You can install `vegas_params` via github link
 ```shell
-pip install git+https://github.com/Sheshuk/vegas_param.git
+pip install git+https://github.com/RTESolution/vegas_params.git
 ```
 
 ## Examples
