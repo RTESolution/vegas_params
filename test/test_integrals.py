@@ -55,7 +55,7 @@ def test_Spherical_integral():
     class Spherical:
         R:Scalar = Scalar(Uniform([0,1]))
         s:Direction = Direction()
-        def make(self,R,s):
+        def __call__(self,R,s):
             self.factor = R**2
             return R*s
 
