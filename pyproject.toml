@@ -4,11 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vegas_params"
-version = "0.0.1"
+description = "A wrapper for the Vegas integrator"
 authors = [
   { name="Andrey Sheshukov", email="ash@jinr.ru" },
 ]
-description = "A wrapper for the Vegas integrator"
+dynamic = ["version"]
+
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
@@ -21,7 +22,9 @@ dependencies = ["numpy>=1.20", "vegas>=5.6"]
 [project.optional-dependencies]
 test = ["pytest>=8"]
 
+[tool.setuptools.dynamic]
+version = {attr = "vegas_params.__version__"}
+
 [project.urls]
 Homepage = "https://github.com/Sheshuk/vegas_param"
 Issues = "https://github.com/Sheshuk/vegas_param/issues"
-
