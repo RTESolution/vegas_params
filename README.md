@@ -1,3 +1,6 @@
+![PyPI - Version](https://img.shields.io/pypi/v/vegas_params)
+![Test](https://github.com/RTESolution/vegas_params/actions/workflows/test.yml/badge.svg)
+
 # vegas_params
 Wrapper package for [Vegas](https://vegas.readthedocs.io) integrator.
 

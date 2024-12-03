@@ -1,6 +1,5 @@
 import vegas
 from .base import Expression
-from warnings import warn
 import numpy as np
 from gvar import gvar
 

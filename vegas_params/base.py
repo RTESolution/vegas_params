@@ -1,8 +1,7 @@
 import numpy as np
 import textwrap
 import abc
-from typing import Callable,Tuple,List, Sequence
-from collections import namedtuple
+from typing import Callable, Sequence
 import inspect
 from functools import wraps
 
@@ -17,7 +16,6 @@ class Parameter(abc.ABC):
     @abc.abstractmethod
     def __construct__(self, x:np.ndarray)->np.ndarray:
         """Calculate this parameter value from the input array"""
-        pass
     def sample(self, size=1):
         """Generate a random sample of this parameter values"""
         x = np.random.uniform(self.input_limits[:,0],

@@ -2,9 +2,9 @@ import numpy as np
 from vegas_params import expression, Uniform, Vector, Direction, Scalar, vector
 from vegas_params import integral
 
-def assert_integral_is_close(e, value, nsigmas=1):
-    x = integral(e)(nitn=10, neval=10000)
-    assert (x.mean - value) < nsigmas*x.sdev
+def assert_integral_is_close(e, value, precision=0.1):
+    x = integral(e)(nitn=30, neval=10000)
+    assert np.abs(x.mean - value) < value*precision
     
 def test_1d_constant_integral():
     #test linear integral
@@ -55,7 +55,7 @@ def test_Spherical_integral():
     class Spherical:
         R:Scalar = Scalar(Uniform([0,1]))
         s:Direction = Direction()
-        def make(self,R,s):
+        def __call__(self,R,s):
             self.factor = R**2
             return R*s
 
