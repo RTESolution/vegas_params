@@ -1,3 +1,4 @@
+![PyPI - Version](https://img.shields.io/pypi/v/vegas_params)
 ![Test](https://github.com/RTESolution/vegas_params/actions/workflows/python-package.yml/badge.svg)
 
 # vegas_params
