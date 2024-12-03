@@ -2,9 +2,9 @@ import numpy as np
 from vegas_params import expression, Uniform, Vector, Direction, Scalar, vector
 from vegas_params import integral
 
-def assert_integral_is_close(e, value, nsigmas=2):
+def assert_integral_is_close(e, value, precision=0.1):
     x = integral(e)(nitn=30, neval=10000)
-    assert (x.mean - value) < nsigmas*x.sdev
+    assert np.abs(x.mean - value) < value*precision
     
 def test_1d_constant_integral():
     #test linear integral
