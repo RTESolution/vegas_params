@@ -21,9 +21,11 @@ class Parameter(abc.ABC):
         x = np.random.uniform(self.input_limits[:,0],
                               self.input_limits[:,1], 
                               size=[size,len(self)])
-        return self.__construct__(x)
+        values = self.__construct__(x)
+        self.factor*=np.ones(size) #make sure the factor is array of size len(sample)
+        return values
         
-    def sample_with_factor(self, N=1, iter_max=10):
+    def sample_with_factor(self, size=1, iter_max=10):
         """Generate a random sample of this expression values, 
         taking into account the factor as the probability density.
 
@@ -41,8 +43,7 @@ class Parameter(abc.ABC):
                 if np.min(self.factor)==np.max(self.factor):
                     #the factor is equal for all values, so just return this sample
                     return sample[:N]
-                
-            factor*=np.ones(len(sample)) #make sure the factor is array of size len(sample)
+                    
             random = np.random.uniform(size=len(sample))
             the_sample = np.append(the_sample, sample, axis=0)
             the_factor = np.append(the_factor, factor, axis=0)
