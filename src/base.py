@@ -16,18 +16,18 @@ class Parameter(abc.ABC):
     @abc.abstractmethod
     def __construct__(self, x:np.ndarray)->np.ndarray:
         """Calculate this parameter value from the input array"""
-    def sample(self, size=1):
-        """Generate a random sample of this parameter values"""
+
+    def _sample_with_factor(self, size=1):
+        """Generate sample of the given size"""
         x = np.random.uniform(self.input_limits[:,0],
-                              self.input_limits[:,1], 
-                              size=[size,len(self)])
+                                  self.input_limits[:,1], 
+                                  size=[size,len(self)])
         values = self.__construct__(x)
-        #self.factor*=np.ones(size) #make sure the factor is array of size len(sample)
         return values
         
-    def sample_with_factor(self, size=1, iter_max=10):
-        """Generate a random sample of this expression values, 
-        taking into account the factor as the probability density.
+    def _sample_with_normalized_factor(self, size=1, iter_max=10):
+        """Generate sample of the given size, but applying the factor as survival probability, 
+        i.e. randomly dropping the values with low factor.
 
         Note: this process is iterative (it might need to generate several samples), and several times slower than regular :meth:`sample` method
         """
@@ -69,7 +69,19 @@ class Parameter(abc.ABC):
                 N_generate = np.clip(N_generate, N/100, N*1000)
                 N_generate = np.asarray(np.ceil(N_generate), dtype=int)
         raise RuntimeError(f"Maximum iterations ({iter_max}) reached. Generated only {sum(selected)} points of {N} requested")
+    
+    def sample(self, size=1, normalize_factor=False):
+        """Generate a random sample of given size of this parameter values
 
+        If 'normalize_factor==True' the output sample will be generated applying the 'self.factor' as survival probability, 
+        i.e. randomly dropping the values with low factor.
+        This can be used for the Monte-Сarlo generation without weights.
+        Note: this method is iterative and can be significantly slower than the regular 'sample(normalize_factor=False)' method.
+        """
+        if (normalize_factor):
+            return self._sample_with_normalized_factor(size)
+        else:
+            return self._sample_with_factor(size)
 
 class Fixed(Parameter):
     """Fixed value, not a part of integration"""
