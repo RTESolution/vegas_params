@@ -6,7 +6,7 @@ from gvar import gvar
 def integral_naiive(e: Expression):
     """naiive MC integration without vegas"""
     def _run_integral(nitn=10, neval=1000, **kwargs):
-        v,w = expr.sample(neval*nitn), e.factor
+        v,w = e.sample(neval*nitn), e.factor
         #reshape for each iteration to be a in a separate row
         v = v.reshape((neval,nitn, *v.shape[1:]))
         w = w.reshape((neval,nitn, *w.shape[1:]))
