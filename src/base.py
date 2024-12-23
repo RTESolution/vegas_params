@@ -54,8 +54,9 @@ class Parameter(abc.ABC):
             #apply the selection
             selected = (the_random*the_factor.max()) < the_factor
             N_selected = selected.sum()
-            print(f"Iteration #{it}: generated {N_generate} -> selected={N_selected}/{len(the_factor)}")
+            # print(f"Iteration #{it}: generated {N_generate} -> selected={N_selected}/{len(the_factor)}")
             if N_selected>=N:
+                self.factor = np.ones(N)*N/len(the_factor)
                 return the_sample[selected][:N]
             else:
                 prob = N_selected/len(the_sample) #estimated selection probability
