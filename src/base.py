@@ -32,9 +32,6 @@ class Parameter(abc.ABC):
         Note: this process is iterative (it might need to generate several samples), and several times slower than regular :meth:`sample` method
         """
         #start with the sample of size N
-        the_sample = self.sample(0) #just get the output size
-        the_factor = self.factor*np.ones(shape=(0,))
-        the_random = np.empty_like(the_factor)
         selected = []
         N = size
         N_generate = int(N*2) #the size of next sample to generate
@@ -48,13 +45,18 @@ class Parameter(abc.ABC):
                     return sample[:N]
                     
             random = np.random.uniform(size=len(sample))
-            the_sample = np.append(the_sample, sample, axis=0)
-            the_factor = np.append(the_factor, factor, axis=0)
-            the_random = np.append(the_random, random, axis=0)
+            if it==0:
+                the_sample = sample
+                the_factor = factor
+                the_random = random
+            else:
+                the_sample = np.append(the_sample, sample, axis=0)
+                the_factor = np.append(the_factor, factor, axis=0)
+                the_random = np.append(the_random, random, axis=0)
             #apply the selection
             selected = (the_random*the_factor.max()) < the_factor
             N_selected = selected.sum()
-            # print(f"Iteration #{it}: generated {N_generate} -> selected={N_selected}/{len(the_factor)}")
+            print(f"Iteration #{it}: generated {N_generate} -> selected={N_selected}/{len(the_factor)}")
             if N_selected>=N:
                 self.factor = np.ones(N)*N/len(the_factor)
                 return the_sample[selected][:N]
