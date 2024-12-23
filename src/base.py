@@ -33,13 +33,15 @@ class Parameter(abc.ABC):
         """
         #start with the sample of size N
         the_sample = self.sample(0) #just get the output size
-        the_factor = self.factor
+        the_factor = self.factor*np.ones(shape=(0,))
         the_random = np.empty_like(the_factor)
         selected = []
         N = size
         N_generate = int(N*2) #the size of next sample to generate
         for it in range(iter_max):
             sample, factor = self.sample(N_generate), self.factor
+            #expand factor
+            factor = factor*np.ones(shape=(N_generate))
             if it==0:
                 if np.min(self.factor)==np.max(self.factor):
                     #the factor is equal for all values, so just return this sample
@@ -171,13 +173,17 @@ class FromDistribution(Expression):
 
 def _expression_from_class(c):
     """A class decorator to make an Expression class"""
+    #check the signature of the callable
+    S = inspect.signature(c.__call__)
+    arguments = list(S.parameters)
+    if arguments[0]=='self':
+        del arguments[0]    
     #prepare the signature
     params = [inspect.Parameter(name=name, 
                                 kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                                default=c.__dict__.get(name, inspect.Parameter.empty),
-                                annotation=annot if annot!=Parameter else inspect.Parameter.empty
-                               ) for name,annot in c.__annotations__.items()]
-    
+                                default=c.__dict__.get(name, S.parameters[name].default),
+                                annotation=c.__annotations__.get(name, S.parameters[name].annotation),
+                               ) for name in arguments]
     S = inspect.Signature(parameters=params)
     #create a new class
     #define the base class
@@ -216,10 +222,6 @@ def expression(obj=None, **parameters):
         class C:
             #check if a first argument is "self"
             __call__=make_function
-        #set parameters
-        
-        C.__annotations__ = {name:Parameter for name in arguments}
-
         cls = _expression_from_class(C)
     else:
         raise TypeError(f"`obj` must be a class or a function, not a {obj.__class__.__name__}")
