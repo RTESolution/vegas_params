@@ -192,7 +192,10 @@ def _expression_from_class(c):
     S = inspect.signature(c.__call__)
     arguments = list(S.parameters)
     if arguments[0]=='self':
-        del arguments[0]    
+        del arguments[0]  
+    #for python<3.10 class doesn't have __annotations__ by default
+    if not hasattr(c, '__annotatations__'):
+        c.__annotations__ = {}
     #prepare the signature
     params = [inspect.Parameter(name=name, 
                                 kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
