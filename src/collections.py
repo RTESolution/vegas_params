@@ -18,8 +18,6 @@ class Concat(Expression):
 #add the operators
 Parameter.__or__ = lambda self,other: Concat(self,other)
 Parameter.__ror__ = lambda self,other: Concat(other, self)
-Parameter.__add__ = lambda self,other: Shifted(self,other)
-Parameter.__radd__ = lambda self,other: Shifted(other, self)
 
 
 class StructArray(Expression):
