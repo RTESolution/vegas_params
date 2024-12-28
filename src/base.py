@@ -4,7 +4,6 @@ import abc
 from typing import Callable, Sequence
 import inspect
 from functools import wraps
-
 class Parameter(abc.ABC):
     """Base class for the parameter in the expression"""
     factor = 1
@@ -17,73 +16,13 @@ class Parameter(abc.ABC):
     def __construct__(self, x:np.ndarray)->np.ndarray:
         """Calculate this parameter value from the input array"""
 
-    def _sample_with_factor(self, size=1):
+    def sample(self, size=1):
         """Generate sample of the given size"""
         x = np.random.uniform(self.input_limits[:,0],
                                   self.input_limits[:,1], 
                                   size=[size,len(self)])
         values = self.__construct__(x)
         return values
-        
-    def _sample_with_normalized_factor(self, size=1, iter_max=10):
-        """Generate sample of the given size, but applying the factor as survival probability, 
-        i.e. randomly dropping the values with low factor.
-
-        Note: this process is iterative (it might need to generate several samples), and several times slower than regular :meth:`sample` method
-        """
-        #start with the sample of size N
-        selected = []
-        N = size
-        N_generate = int(N*2) #the size of next sample to generate
-        for it in range(iter_max):
-            sample, factor = self.sample(N_generate), self.factor
-            #expand factor
-            factor = factor*np.ones(shape=(N_generate))
-            if it==0:
-                if np.min(self.factor)==np.max(self.factor):
-                    #the factor is equal for all values, so just return this sample
-                    return sample[:N]
-                    
-            random = np.random.uniform(size=len(sample))
-            if it==0:
-                the_sample = sample
-                the_factor = factor
-                the_random = random
-            else:
-                the_sample = np.append(the_sample, sample, axis=0)
-                the_factor = np.append(the_factor, factor, axis=0)
-                the_random = np.append(the_random, random, axis=0)
-            #apply the selection
-            selected = (the_random*the_factor.max()) < the_factor
-            N_selected = selected.sum()
-            print(f"Iteration #{it}: generated {N_generate} -> selected={N_selected}/{len(the_factor)}")
-            if N_selected>=N:
-                self.factor = np.ones(N)*N/len(the_factor)
-                return the_sample[selected][:N]
-            else:
-                prob = N_selected/len(the_sample) #estimated selection probability
-                #now decide how many items to generate
-                # N = prob*(N_total) = N_selected + prob*N_generate =>
-                N_generate = (N-N_selected)/prob
-                #additional 20% to avoid making small iterations
-                N_generate *= 1.2
-                #make sure we don't make a sample too small or too large
-                N_generate = np.clip(N_generate, N/100, N*1000)
-                N_generate = np.asarray(np.ceil(N_generate), dtype=int)
-        raise RuntimeError(f"Maximum iterations ({iter_max}) reached. Generated only {sum(selected)} points of {N} requested")
-    
-    def sample(self, size=1, normalize_factor=False):
-        """Generate a random sample of given size of this parameter values
-
-        If 'normalize_factor==True' the output sample will be generated applying the 'self.factor' as survival probability, 
-        i.e. randomly dropping the values with low factor.
-        This can be used for the Monte-Сarlo generation without weights.
-        Note: this method is iterative and can be significantly slower than the regular 'sample(normalize_factor=False)' method.
-        """
-        if (normalize_factor):
-            return self._sample_with_normalized_factor(size)
-        else:
-            return self._sample_with_factor(size)
 
 class Fixed(Parameter):
     """Fixed value, not a part of integration"""
@@ -159,17 +98,6 @@ class Expression(Uniform):
         label = f'{self.__class__.__name__}[{len(self)}]'
         pars = '\n'.join([f' --> {name}={repr(par)}' for name,par in self.parameters.items()])
         return f'{label}(\n{textwrap.indent(pars,"    ")}\n)'
-
-class Concat(Expression):
-    def __init__(self, *expressions:Sequence[Parameter]):
-        super().__init__(**{f"p_{num}":expr for num,expr in enumerate(expressions)})
-    @staticmethod
-    def __call__(*args:Sequence[np.ndarray])->np.ndarray:
-        result = np.concatenate(args,axis=1)
-        return result.view(type(args[0]))
-    def __or__(self, other):
-        #if concatenating with another Concat
-        return Concat(*list(self.parameters.values()), other)
 
 class FromDistribution(Expression):
     """Sample the input from the given distribution"""
@@ -270,10 +198,5 @@ def forward_input(func):
 Shifted = expression(lambda v,shift: v+shift)
 Scaled = expression(lambda v,factor: v*factor)
 
-#add the operators
-Parameter.__or__ = lambda self,other: Concat(self,other)
-Parameter.__ror__ = lambda self,other: Concat(other, self)
-Parameter.__add__ = lambda self,other: Shifted(self,other)
-Parameter.__radd__ = lambda self,other: Shifted(other, self)
 Parameter.__mul__ = lambda x,y:Scaled(x,y)
 Parameter.__rmul__ = lambda x,y:Scaled(y,x)
