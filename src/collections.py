@@ -38,5 +38,5 @@ class StructArray(Expression):
             fmt = (a.dtype, size)
             formats.append(fmt)
         dtype = np.dtype({'names':list(self.parameters),'formats':formats})
-        result = np.concatenate(args, axis=self.axis).squeeze()
-        return result.view(dtype=dtype)
+        result = np.concatenate(args, axis=self.axis)
+        return result.view(dtype=dtype).squeeze()
