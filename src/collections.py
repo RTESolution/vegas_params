@@ -31,7 +31,6 @@ class StructArray(Expression):
         #store the formats for each argument
         formats = []
         for a in args:
-            a = a.squeeze(1)
             size = a.shape[self.axis]
             fmt = (a.dtype, size)
             formats.append(fmt)
