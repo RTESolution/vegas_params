@@ -35,7 +35,7 @@ class Vector:
     xyz:Uniform = Fixed([0,0,0])
     @staticmethod
     def __call__(xyz):
-        return xyz.reshape(xyz.shape[0],-1,3).view(vector)
+        return xyz.reshape(xyz.shape[0],-1,xyz.shape[-1]).view(vector)
 
 @expression
 class Scalar:
@@ -54,12 +54,3 @@ class Direction(Vector):
     def __call__(cos_theta:np.ndarray, phi:np.ndarray)->np.ndarray:
         sin_theta = np.sqrt(1-cos_theta**2)
         return np.stack([sin_theta*np.cos(phi),sin_theta*np.sin(phi), cos_theta], axis=-1).view(vector)
-
-
-@expression
-class PolarVector(Vector):
-    R:Uniform = 1
-    s:Direction = Direction()
-    @staticmethod
-    def __call__(R,s):
-        return R*s
