@@ -8,7 +8,7 @@ This package allows user to define composite expressions, which can be used to:
 1. Calculate integrals using `vegas` algorithm
 2. Make random samples of given expressions (for MC simulation apart from `vegas`)
 
-## Installation
+## 1. Installation
 
 You can install `vegas_params` from PyPI:
 ```shell
@@ -20,8 +20,7 @@ or directly via github link:
 pip install git+https://github.com/RTESolution/vegas_params.git
 ```
 
-## Quickstart
-### Gaussian integral
+## 2. Quickstart
 Let's caluclate integral 
 $$
 \int\limits_{-1000}^{1000}dx \int\limits_{-1000}^{1000}dy \; e^{-(x^2+y^2)}
@@ -42,9 +41,10 @@ gaussian(nitn=20, neval=100000)
 #3.13805(16) - close to expected Pi
 ```
 
-## Defining expressions
+## 3. Defining expressions
 
-### Basic parameters
+
+### 3.1 Basic parameters
 There are basic types of expressions:
 ```python
 #fixed value:
@@ -52,8 +52,33 @@ c = vp.Fixed(299792458) #speed of light in vacuum in m/s
 #uniform value, that will be integrated over
 cos_theta = vp.Uniform([-1,1]) #cos_theta is in the given range
 ```
+### 3.2 Concatenating parameters: `collections.Concat`
+It's possible to concatenate the parameters using `vp.collections.Concat`:
+```python
+#say we want to define 3 coordinates with different limits: x in [-1,1], y in [0,10] and z fixed to 0
+xyz = vp.collections.Concat(vp.Uniform([-1,1]), vp.Uniform([0,10]), vp.Fixed(0))
+xyz.sample(1)
+# array([[-0.67329745,  5.77401635,  0.        ]])
+```
+Same concatenation can be done with `|` operator. Also `Fixed` can be omitted:
+```python
+#equivalent to above
+xyz = vp.Uniform([-1,1])|vp.Uniform([0,10])|0
+xyz.sample(1)
+#array([[-0.20342379,  0.7356486 ,  0.        ]])
+```
+### 3.3 Producing structured array with `collections.StructArray`
+It's possible to make a [numpy.structured_array](https://numpy.org/doc/stable/user/basics.rec.html#structured-arrays) from given parameters:
+```python
+xyz = vp.collections.StructArray(x=vp.Uniform([-1,1]), y=vp.Uniform([0,10]), z=0)
+data = xyz.sample(1)
+#array(([-0.04495105], [1.97159299], [0.]),
+# dtype=[('x', '<f8', (1,)), ('y', '<f8', (1,)), ('z', '<f8', (1,))])
+data['x']
+#array([-0.04495105])
+```
 
-### Compound expressions
+### General compund expressions with `expression` decorator
 Other expressions can be defined from these components.
 
 More complex expressions can be defined using `vp.Expression` class or `vp.expression` decorator:
@@ -68,7 +93,7 @@ def product(x,y):
 It's possible to also add the Jacobian factor to the expression. 
 To do this, add `self` argument to function and set `serlf.factor` to needed value. This value will be multiplied by the expression value during the integration.
 
-## Sampling
+## 4. Sampling
 
 The `vegas_params` expressions and parameters can be used not only for integration, but as random value generators.
 
