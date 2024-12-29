@@ -78,7 +78,7 @@ data['x']
 #array([-0.04495105])
 ```
 
-### General compund expressions with `expression` decorator
+### 3.4 General compund expressions with `expression` decorator
 Other expressions can be defined from these components.
 
 More complex expressions can be defined using `vp.Expression` class or `vp.expression` decorator:
@@ -97,6 +97,7 @@ To do this, add `self` argument to function and set `serlf.factor` to needed val
 
 The `vegas_params` expressions and parameters can be used not only for integration, but as random value generators.
 
+## 4.1. Sampling without factor
 You can ask an expression to generate a sample of given size:
 ```python
 data = expr.sample(size=1000)
@@ -104,7 +105,11 @@ data = expr.sample(size=1000)
 
 If your expression, or it's components (the expression parameters, provided in constructor) define the `factor`, then a simple `sample` method will not take it into account.
 
-You need to use `sample_with_factor` method, which will iteratively generate samples and filter them, by randomly discarding the samples according to their `factor` values:
+## 4.2 Sampling with factor
+
+In case you want to get a sample which is distributed according to the expression's `factor`, you need to use `sample_with_factor` method, which will iteratively generate samples and filter them, by randomly discarding the samples according to their `factor` values:
 ```python
 data = expr.sample_with_factor(size=1000)
 ```
+
+Note that this method is iterative and much slower that `sample` method.
