@@ -194,9 +194,15 @@ def forward_input(func):
         return result, arguments
     return _f
     
+    
 #additional methods
-Shifted = expression(lambda v,shift: v+shift)
-Scaled = expression(lambda v,factor: v*factor)
+@expression
+def Shifted(v,shift):
+    return v+shift
+    
+@expression
+def Scaled(v,factor):
+    return v*factor
 
 Parameter.__add__ = lambda self,other: Shifted(self,other)
 Parameter.__radd__ = lambda self,other: Shifted(other, self)
