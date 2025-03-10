@@ -25,6 +25,9 @@ test = ["pytest>=8"]
 [tool.setuptools.dynamic]
 version = {attr = "vegas_params.__version__"}
 
+[tool.setuptools.package-dir]
+vegas_params = "src"
+
 [project.urls]
-Homepage = "https://github.com/Sheshuk/vegas_param"
-Issues = "https://github.com/Sheshuk/vegas_param/issues"
+Homepage = "https://github.com/RTESolution/vegas_params"
+Issues = "https://github.com/RTESolution/vegas_params/issues"
