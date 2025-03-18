@@ -77,6 +77,8 @@ class Expression(Uniform):
         factor_from_parameters = 1
         for name,par in self.parameters.items():
             par_values[name] = par.__construct__(x[:,n:n+len(par)])
+            if np.ndim(par.factor)>0:
+                assert par.factor.shape == (x.shape[0],), f"for expr {name=} {par.factor.shape=}: {par.factor}"
             factor_from_parameters *= par.factor
             n+=len(par)
         #run the final evaluation function
