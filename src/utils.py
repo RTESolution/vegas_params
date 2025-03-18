@@ -102,7 +102,7 @@ from .base import expression,Expression, Uniform
 @expression
 def factor(self, expr:Expression, value:Uniform):
     """apply the normalization factor to the expression"""
-    self.factor = value
+    self.factor = value.squeeze()
     return expr
 
 @expression
@@ -110,9 +110,13 @@ def total(expr:Expression):
     """throw away the calculated value, so we can calc integral of expression parameter space"""
     return np.ones(len(expr))
 
-def normalize(expr:Expression, value=1, **vegas_kwargs):
-    """return the expression with normalized factor"""
-    #first calculate the total integral
-    norm = integral(total(expr))(**vegas_kwargs)
-    #return the one with corrected factor
-    return factor(expr, value/norm.mean)
+def normalize_integral(value=1, **vegas_kwargs):
+    """decorator to create the expression with normalized factor"""
+    def _wrapper(expr:Expression):
+        #first calculate the total integral
+        norm = integral(total(expr))(**vegas_kwargs)
+        norm_factor = value/norm.mean
+        print(f'Normalizing {norm=} to {value=} with {norm_factor=}')
+        #return the one with corrected factor
+        return factor(expr, norm_factor)
+    return _wrapper
