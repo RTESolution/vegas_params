@@ -61,10 +61,25 @@ class Expression(Uniform):
     """Complex expression of the given input parameters"""
     def __init__(self, **parameters):
         self.parameters = {name:_make_parameter(par) for name,par in  parameters.items()} 
-    def __getitem__(self, name:str)->Parameter:
-        return self.parameters[name]
-    def __setitem__(self, name:str, value):
-        self.parameters[name] = _make_parameter(value)
+    
+    def __getitem__(self, key:str)->Parameter:
+        """Get the parameter of this expression 
+        (key can be a dot separated path, to access children expressions' parameters)"""
+        expr = self
+        for token in key.split('.'):
+            expr = expr.parameters[token]
+        return expr
+    
+    def __setitem__(self, key:str, value):
+        """Set the subexpression to a given value
+        (key can be a dot separated path, to access children expressions' parameters)
+        """
+        try:
+            path, key = key.rsplit('.',1)
+            expr = self[path]
+        except ValueError:
+            expr = self
+        expr.parameters[key] = _make_parameter(value)
         
     @property
     def input_limits(self):

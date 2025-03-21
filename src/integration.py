@@ -40,7 +40,7 @@ def integral(e: Expression):
                 If adapt is Expression - use it for adaptation run. 
                 This allows to run adaptation on a smoother variant of a function.
             **vegas_parameters: dict
-                Keyword parameters for the vegas run 
+                Keyword parameters for the vegas.Integrator 
                 (see https://vegas.readthedocs.io/en/latest/vegas.html#vegas.Integrator)
             """
             if adapt==True:
