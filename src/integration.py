@@ -26,10 +26,23 @@ def make_integrand(e: Expression):
     return _integrand
     
 def integral(e: Expression):
-    """decorator for turning expression into integral"""
+    """decorator for turning expression into integral function"""
     if(len(e)>0):
         integrator = vegas.Integrator(e.input_limits)
-        def _run_integral(adapt=False, **vegas_parameters):
+        def _run_integral(adapt:bool|Expression=False, **vegas_parameters):
+            """Run the integration calculation. 
+            Parameters:
+            -----------
+            adapt: bool or Expression
+                Defines how to make vegas "adaptation" run - letting vegas to study the integrable function.
+                If adapt=False (default) - no adaptation run
+                If adapt=True - make adaptation run on this expression
+                If adapt is Expression - use it for adaptation run. 
+                This allows to run adaptation on a smoother variant of a function.
+            **vegas_parameters: dict
+                Keyword parameters for the vegas run 
+                (see https://vegas.readthedocs.io/en/latest/vegas.html#vegas.Integrator)
+            """
             if adapt==True:
                 #adapt on the same function
                 adapt=e
