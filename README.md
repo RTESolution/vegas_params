@@ -93,6 +93,38 @@ def product(x,y):
 It's possible to also add the Jacobian factor to the expression. 
 To do this, add `self` argument to function and set `serlf.factor` to needed value. This value will be multiplied by the expression value during the integration.
 
+### 3.5 Expression utilities
+There are several utilities to modify the existing expression:
+* `vegas_params.utils.factor`: create an expression with multiplication factor, which will affect the final integral. 
+* `vegas_params.utils.total`: create an expression with return value=1, to make
+* `vegas_params.utils.normalize_integral`: create expression with the total integral normalized to given value.
+
+The usage of these expressions is illustrated by this example:
+```python
+>> import vegas_params as vp
+>> from vegas_params.utils import total, factor, normalize_integral
+>> x = vp.Uniform([-1,1])
+>> ix =vp.integral(x)(nitn=10) 
+>> print(f"\\int x dx = {ix}")
+
+>> ix = vp.integral(total(y))(nitn=10)
+>> print(f"\\int dx = {ix}")
+
+>> xf = factor(x, value=5)
+>> ixf = vp.integral(total(xf))(nitn=10)
+>> print(f"5*\\int dx = {ixf}")
+
+>> xn = normalize_integral(value=123)(x)
+>> ixn = vp.integral(total(xn))(nitn=10)
+>> print(f"N*\\int dx = {ixn}")
+
+\int x dx = -7.1(9.3)e-05
+\int dx = 2.000000000000000(47)
+5*\int dx = 10.00000000000000(24)
+Normalizing norm=2.000000000000000(47) to value=123 with norm_factor=61.5
+N*\int dx = 122.9999999999997(29)
+```
+
 ## 4. Sampling
 
 The `vegas_params` expressions and parameters can be used not only for integration, but as random value generators.
