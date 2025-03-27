@@ -29,7 +29,7 @@ def integral(e: Expression):
     """decorator for turning expression into integral function"""
     if(len(e)>0):
         integrator = vegas.Integrator(e.input_limits)
-        def _run_integral(adapt:bool|Expression=False, **vegas_parameters):
+        def _run_integral(adapt=False, **vegas_parameters):
             """Run the integration calculation. 
             Parameters:
             -----------
