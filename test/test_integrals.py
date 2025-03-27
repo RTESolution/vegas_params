@@ -78,3 +78,31 @@ def test_Spherical_integral_normalized():
         
     assert_integral_is_close(density, 123)
 
+def test_integral_with_external_adapt():
+    #given a large space
+    space_xy = vp.Vector(vp.Uniform([-1000,1000])**2)
+    #find an area of a tiny circle
+    center = vp.Vector([5,1])
+    radius=1e-1
+    @vp.expression(R=space_xy, center=center, radius=vp.Scalar(radius))
+    def sharp_function(R, center, radius):
+        """an expression which is nonzero in a very tiny region around position"""
+        dr = np.linalg.norm(R-center, axis=-1, keepdims=True)
+        return 1.*(dr < radius).squeeze()
+
+    @vp.expression(R=space_xy, center=center, radius=vp.Scalar(radius))
+    def soft_function(R, center, radius):
+        """a softer function, which is nonzero everywhere"""
+        dr = np.linalg.norm(R-center, axis=-1, keepdims=True)
+        return np.exp(-dr/radius).squeeze()
+
+    #check that simple integral with standard adaptation gives us 0
+    i_default = vp.integral(sharp_function)(nitn=5, neval=1000, adapt=True)
+    assert np.isclose(i_default.mean, 0)
+
+    #check that simple integral with standard adaptation gives us 0
+    i_adapt = vp.integral(sharp_function)(nitn=5, neval=1000, adapt=soft_function)
+    I_expected = np.pi*radius**2
+    assert np.isclose(i_adapt.mean, I_expected, atol=1e-3)
+    
+    
