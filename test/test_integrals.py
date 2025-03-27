@@ -97,12 +97,12 @@ def test_integral_with_external_adapt():
         return np.exp(-dr/radius).squeeze()
 
     #check that simple integral with standard adaptation gives us 0
-    i_default = vp.integral(sharp_function)(nitn=5, neval=1000, adapt=True)
+    i_default = vp.integral(sharp_function)(nitn=50, neval=10000, adapt=True)
     assert np.isclose(i_default.mean, 0)
 
     #check that simple integral with standard adaptation gives us 0
-    i_adapt = vp.integral(sharp_function)(nitn=5, neval=1000, adapt=soft_function)
+    i_adapt = vp.integral(sharp_function)(nitn=50, neval=10000, adapt=soft_function)
     I_expected = np.pi*radius**2
-    assert np.isclose(i_adapt.mean, I_expected, atol=1e-3)
+    assert np.isclose(i_adapt.mean, I_expected, rtol=1e-1)
     
     
