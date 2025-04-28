@@ -29,7 +29,7 @@ def integral(e: Expression):
     """decorator for turning expression into integral function"""
     if(len(e)>0):
         integrator = vegas.Integrator(e.input_limits)
-        def _run_integral(adapt=False, **vegas_parameters):
+        def _run_integral(adapt=False, adapt_params=dict(nitn=10, neval=1000), **vegas_parameters):
             """Run the integration calculation. 
             Parameters:
             -----------
@@ -39,6 +39,9 @@ def integral(e: Expression):
                 If adapt=True - make adaptation run on this expression
                 If adapt is Expression - use it for adaptation run. 
                 This allows to run adaptation on a smoother variant of a function.
+            adapt_params: dict
+                Keyword parameters for the vegas.Integrator for the adaptatin run
+                (see https://vegas.readthedocs.io/en/latest/vegas.html#vegas.Integrator)
             **vegas_parameters: dict
                 Keyword parameters for the vegas.Integrator 
                 (see https://vegas.readthedocs.io/en/latest/vegas.html#vegas.Integrator)
@@ -49,7 +52,7 @@ def integral(e: Expression):
             if adapt!=False:
                 #run the calculation without storing the result
                 assert isinstance(adapt, Expression), f"adapt must be an Expression object, not {type(adapt)}"
-                integrator(vegas.lbatchintegrand(make_integrand(adapt)), nitn=10, neval=1000)
+                integrator(vegas.lbatchintegrand(make_integrand(adapt)), **adapt_params)
             return integrator(vegas.lbatchintegrand(make_integrand(e)), **vegas_parameters, adapt=False)
         return _run_integral
     
